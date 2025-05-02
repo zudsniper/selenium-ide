@@ -25,7 +25,8 @@ export const updateFieldAutoComplete =
   (name: string) =>
   (testID: string, commandID: string) =>
   (_e: any, value: string) => {
+    // Make sure we update the step with the string value directly
     window.sideAPI.tests.updateStep(testID, commandID, {
-      [name]: value,
+      [name]: value || "",
     })
   }

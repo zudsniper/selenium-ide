@@ -1,5 +1,7 @@
 import type { LanguageMap } from '../en/index'
 import commandMap from '@seleniumhq/side-model/dist/I18N/zh/Commands'
+// Import our local command field descriptions
+import CommandFieldDescriptions from './CommandFieldDescriptions'
 
 // 窗口顶部菜单
 const windowTab = {
@@ -221,6 +223,8 @@ export const language: LanguageMap = {
   playback,
   testCore,
   commandMap,
+  // Add the command field descriptions
+  commandFieldDescriptions: CommandFieldDescriptions
 }
 
 export default language

@@ -28,14 +28,26 @@ const CommandLocatorField: FC<CommandArgFieldProps> = ({
   const updateTarget = updateField(fieldName)
   const updateTargetAutoComplete = updateFieldAutoComplete(fieldName)
   const [localValue, setLocalValue] = React.useState(command[fieldName])
+  
   const onChange = (e: any) => {
     setLocalValue(e)
     updateTarget(testID, command.id)(e)
   }
+  
   const onChangeAutoComplete = (e: any, value: string) => {
     setLocalValue(value)
     updateTargetAutoComplete(testID, command.id)(e, value)
   }
+  
+  // Handle blur event to save the value when user clicks away
+  const onBlur = () => {
+    if (localValue !== command[fieldName]) {
+      window.sideAPI.tests.updateStep(testID, command.id, {
+        [fieldName]: localValue || "",
+      })
+    }
+  }
+  
   useEffect(() => {
     setLocalValue(command[fieldName])
   }, [command.id])
@@ -53,11 +65,28 @@ const CommandLocatorField: FC<CommandArgFieldProps> = ({
         return value
     }
   }
-  const fullnote = intl.formatMessage({
-    id: `commandMap.${command.command}.${fieldName}.description`,
-  });
-  const label = fullnote
-    ? handleLabel(FieldName) + ' - ' + fullnote
+
+  // First try to get the description from command field descriptions, if not found fall back to command description
+  let fullNote = ''
+  try {
+    fullNote = intl.formatMessage({
+      id: `commandFieldDescriptions.${command.command}.${fieldName}.description`,
+      defaultMessage: '' // Return empty string if not found
+    })
+    
+    // If the specific field description wasn't found, fall back to general command description
+    if (!fullNote) {
+      fullNote = intl.formatMessage({
+        id: `commandMap.${command.command}.description`,
+        defaultMessage: '' // Return empty string if not found
+      })
+    }
+  } catch (e) {
+    console.warn(`Missing translation for command ${command.command}, field ${fieldName}:`, e)
+  }
+
+  const label = fullNote
+    ? handleLabel(FieldName) + ' - ' + fullNote
     : handleLabel(FieldName)
 
   return (
@@ -77,6 +106,7 @@ const CommandLocatorField: FC<CommandArgFieldProps> = ({
         onChange={(_event: any, newValue: string | null) => {
           onChange(newValue)
         }}
+        onBlur={onBlur}
         onContextMenu={() => {
           window.sideAPI.menus.open('textField')
         }}
@@ -116,7 +146,7 @@ const CommandLocatorField: FC<CommandArgFieldProps> = ({
       >
         <AddToHomeScreenIcon />
       </IconButton>
-      <Tooltip className="mx-2 my-auto" title={fullnote} placement="top-end">
+      <Tooltip className="mx-2 my-auto" title={fullNote} placement="top-end">
         <HelpCenter />
       </Tooltip>
     </FormControl>

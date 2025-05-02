@@ -11,7 +11,7 @@ import {Builder} from 'selenium-webdriver'
 import getScriptManager from 'selenium-webdriver/bidi/scriptManager'
 
 import downloadDriver from './download'
-import startDriver, {port, WebdriverDebugLog} from './start'
+import startDriver, {WebdriverDebugLog, basePort} from './start'
 import BaseController from '../Base'
 import {createBidiAPIBindings} from './bidi'
 
@@ -231,6 +231,7 @@ export default class DriverController extends BaseController {
     stopped = true
     scriptManager?: Awaited<ReturnType<typeof getScriptManager>>
     windowHandle?: string
+    port: number = basePort
 
     async build(
         {
@@ -238,8 +239,8 @@ export default class DriverController extends BaseController {
             capabilities = {
                 webSocketUrl: this.session.store.get('browserInfo.useBidi') ?? false,
             },
-            // The "9515" is the port opened by chrome driver.
-            server = 'http://localhost:' + port,
+            // Use the dynamic port discovered and stored from startProcess
+            server = `http://localhost:${this.port}`,
         }: DriverOptions = {
             browser: this.session.store.get('browserInfo.browser') ?? 'electron',
             capabilities: {
@@ -288,10 +289,7 @@ export default class DriverController extends BaseController {
             hooks: {
                 onBeforePlay: (v) => this.session.playback.onBeforePlay(v),
             },
-            /************以下为我新增***************/
             implicitWait: this.session.projects.project.timeout || 5000
-            /************以上为我新增***************/
-
         })
         return executor
     }
@@ -347,10 +345,12 @@ export default class DriverController extends BaseController {
     async startProcess(
         info: BrowserInfo = ourElectronBrowserInfo
     ): Promise<null | string> {
-        // this.stopped = false
+        this.stopped = false
         const results = await startDriver(this.session)(info)
         if (results.success) {
             this.driverProcess = results.driver
+            this.port = results.port
+            WebdriverDebugLog(`Driver started successfully on port ${results.port}`)
             return null
         }
         console.error('Failed to start chromedriver process', results.error)

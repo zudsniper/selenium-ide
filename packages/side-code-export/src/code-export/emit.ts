@@ -38,7 +38,6 @@ import {
 } from '../types'
 import { writeCommands } from './utils'
 import { LanguageHooks } from './hook'
-import { CommandKey } from '@seleniumhq/side-model/src/Commands'
 
 export interface EmitterContext extends Omit<LanguageEmitterOpts, 'hooks'> {
   testLevel?: number
@@ -56,13 +55,15 @@ export interface EmitterContext extends Omit<LanguageEmitterOpts, 'hooks'> {
 function validateCommand(command: CommandShape) {
   const commandName = command.command
   if (!commandName.startsWith('//')) {
-    let commandSchema = Commands[commandName as CommandKey]
+    let commandSchema = Commands[commandName as keyof typeof Commands]
     if (!commandSchema) throw new Error(`Invalid command '${commandName}'`)
     const hasTarget = 'target' in commandSchema
     if (hasTarget !== Boolean(command.target)) {
+      // Safely check if target exists and has isOptional property
       const isOptional = hasTarget
-        ? // @ts-expect-error holy fucking shut up already
-          Boolean(commandSchema.target.isOptional)
+        ? commandSchema.target &&
+          'isOptional' in commandSchema.target &&
+          !!commandSchema.target.isOptional
         : true
       if (!isOptional) {
         throw new Error(
@@ -72,9 +73,11 @@ function validateCommand(command: CommandShape) {
     }
     const hasValue = 'value' in commandSchema
     if (hasValue !== Boolean(command.value)) {
+      // Safely check if value exists and has isOptional property
       const isOptional = hasValue
-        ? // @ts-expect-error holy fucking shut up already
-          Boolean(commandSchema.value.isOptional)
+        ? commandSchema.value &&
+          'isOptional' in commandSchema.value &&
+          !!commandSchema.value.isOptional
         : true
       if (!isOptional) {
         throw new Error(

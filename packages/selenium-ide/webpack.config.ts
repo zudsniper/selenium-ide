@@ -2,24 +2,24 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import fs from 'fs'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import kebabCase from 'lodash/fp/kebabCase'
+import kebabCase from 'lodash/fp/kebabCase.js'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
-import {
-  Configuration,
-  SourceMapDevToolPlugin,
-  WebpackPluginInstance,
-} from 'webpack'
+// Remove the fileURLToPath import since we're not using import.meta.url anymore
+import webpack from 'webpack'
 // eslint-disable-next-line node/no-unpublished-import
 import type { Configuration as DevServerConfiguration } from 'webpack-dev-server'
+
+// Define Configuration type based on webpack
+type Configuration = webpack.Configuration
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isDevelopment = !isProduction
 const useHMR = process.env.SIDE_DEV === '1' && isDevelopment
 
-const commonPlugins: WebpackPluginInstance[] = [
+const commonPlugins: webpack.WebpackPluginInstance[] = [
   new ForkTsCheckerWebpackPlugin(),
-  new SourceMapDevToolPlugin({
+  new webpack.SourceMapDevToolPlugin({
     filename: '[file].map',
   }),
 ]
@@ -46,8 +46,8 @@ const commonConfig: Pick<
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        // eslint-disable-next-line node/no-unpublished-require
-        loader: require.resolve('ts-loader'),
+        // Use a direct string instead of require.resolve
+        loader: 'ts-loader',
         options: {
           transpileOnly: true,
         },
@@ -131,7 +131,7 @@ const rendererConfig: Configuration = {
   plugins: commonPlugins.concat(
     Object.values(rendererEntries).map(
       ([filename]) =>
-        getBrowserPlugin(filename) as unknown as WebpackPluginInstance
+        getBrowserPlugin(filename) as unknown as webpack.WebpackPluginInstance
     )
   ),
   target: 'electron-renderer',
@@ -169,7 +169,7 @@ const playbackRendererBidiConfig: Configuration = {
     .concat(
       getBrowserPlugin(
         'playback-window-bidi'
-      ) as unknown as WebpackPluginInstance
+      ) as unknown as webpack.WebpackPluginInstance
     )
     .concat(
       new CopyWebpackPlugin({

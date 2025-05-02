@@ -6,6 +6,7 @@ import { configureLogging, connectSessionLogging } from './log'
 import createSession from './session'
 import installReactDevtools from './install-react-devtools'
 import { isAutomated } from './util'
+import fetch from 'electron-fetch'
 
 // whatever
 app.commandLine.appendSwitch('remote-debugging-port', '8315')
@@ -29,11 +30,44 @@ process.on('uncaughtException', (error) => {
   console.error('Unhandled Error', error)
 })
 
+// Function to wait for webpack dev server to be ready in development mode
+async function waitForDevServer() {
+  const isDev = process.env.SIDE_DEV === '1'
+  
+  if (!isDev || app.isPackaged) {
+    return true // No need to wait in production mode
+  }
+
+  console.log('Checking if webpack dev server is ready...')
+  
+  // Try to connect to the webpack dev server status endpoint
+  for (let attempt = 0; attempt < 30; attempt++) {
+    try {
+      const response = await fetch('http://localhost:8083/webpack-dev-server-status')
+      if (response.ok) {
+        console.log('Webpack dev server is ready!')
+        return true
+      }
+    } catch (err) {
+      // Server not ready yet, wait and retry
+      await new Promise(resolve => setTimeout(resolve, 500))
+      console.log(`Waiting for webpack dev server... (attempt ${attempt + 1})`)
+    }
+  }
+  
+  console.error('Timed out waiting for webpack dev server')
+  return false
+}
+
 // Start and stop hooks
 app.on('ready', async () => {
   if (!app.isPackaged && !isAutomated) {
     installReactDevtools()
   }
+  
+  // Wait for webpack dev server to be ready in development mode
+  await waitForDevServer()
+  
   const session = await createSession(app)
   connectSessionLogging(session)
   await session.system.startup()

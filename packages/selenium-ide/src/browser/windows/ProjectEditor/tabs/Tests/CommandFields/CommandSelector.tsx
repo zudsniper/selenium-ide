@@ -105,7 +105,12 @@ const CommandSelector: FC<CommandSelectorProps> = ({
         </Tooltip>
         <Tooltip
           className="flex-initial mx-2 my-auto"
-          title={<FormattedMessage id={`commandMap.${command.command}.description`} />}
+          title={
+            <FormattedMessage 
+              id={`commandMap.${command.command}.description`} 
+              defaultMessage={command.command} // Use command name as fallback
+            />
+          }
           placement="top-end"
         >
           <HelpCenter />

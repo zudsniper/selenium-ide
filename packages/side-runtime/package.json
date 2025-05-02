@@ -25,13 +25,13 @@
     "url": "https://github.com/SeleniumHQ/selenium-ide/issues"
   },
   "devDependencies": {
-    "@seleniumhq/get-driver": "4.0.13",
-    "@seleniumhq/side-testkit": "4.0.13",
-    "@seleniumhq/webdriver-testkit": "4.0.13"
+    "@seleniumhq/get-driver": "workspace:*",
+    "@seleniumhq/side-testkit": "workspace:*",
+    "@seleniumhq/webdriver-testkit": "workspace:*"
   },
   "dependencies": {
-    "@seleniumhq/side-commons": "4.0.13",
-    "@seleniumhq/side-model": "4.0.13",
+    "@seleniumhq/side-commons": "workspace:*",
+    "@seleniumhq/side-model": "workspace:*",
     "@types/selenium-webdriver": "^4.1.26",
     "selenium-webdriver": "^4.25.0"
   },

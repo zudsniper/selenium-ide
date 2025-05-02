@@ -1,4 +1,6 @@
 import { Commands as commandMap } from '@seleniumhq/side-model'
+// Import our local command field descriptions
+import CommandFieldDescriptions from './CommandFieldDescriptions'
 
 const windowTab = {
   file: '&File',
@@ -215,6 +217,8 @@ export const language = {
   playback,
   testCore,
   commandMap,
+  // Add the command field descriptions
+  commandFieldDescriptions: CommandFieldDescriptions
 }
 
 // Creating a type of this so other locales are prompted to be filled in by

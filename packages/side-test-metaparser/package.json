@@ -24,5 +24,15 @@
   "bugs": {
     "url": "https://github.com/SeleniumHQ/selenium-ide/issues"
   },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.15.0"
+  },
+  "dependencies": {
+    "@seleniumhq/side-commons": "workspace:*",
+    "@seleniumhq/side-model": "workspace:*",
+    "@seleniumhq/side-testkit": "workspace:*",
+    "@seleniumhq/webdriver-testkit": "workspace:*"
+  },
   "gitHead": "507c7c802f34196e6ee4800bf5c0b36553d41369"
 }

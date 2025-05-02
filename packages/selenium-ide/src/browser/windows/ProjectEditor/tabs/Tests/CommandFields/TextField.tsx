@@ -39,12 +39,26 @@ const CommandTextField: FC<CommandFieldProps> = ({
         return value
     }
   }
-  // 一定会使用languageMap.commandMap,其实是为了兼容参数commands
-  const fullNote =
-    note ||
-    intl.formatMessage({
-      id: `commandMap.${command.command}.${fieldName}.description`,
+  
+  // First try to get the description from command field descriptions, if not found fall back to command description
+  let fullNote = note
+  try {
+    fullNote = note || intl.formatMessage({
+      id: `commandFieldDescriptions.${command.command}.${fieldName}.description`,
+      defaultMessage: '' // Return empty string if not found
     })
+    
+    // If the specific field description wasn't found, fall back to general command description
+    if (!fullNote) {
+      fullNote = intl.formatMessage({
+        id: `commandMap.${command.command}.description`,
+        defaultMessage: '' // Return empty string if not found
+      })
+    }
+  } catch (e) {
+    console.warn(`Missing translation for command ${command.command}, field ${fieldName}:`, e)
+  }
+  
   const label = fullNote
     ? handleLabel(FieldName) + ' - ' + fullNote
     : handleLabel(FieldName)
